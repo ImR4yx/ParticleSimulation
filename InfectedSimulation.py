@@ -10,36 +10,37 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 TEXTFONT = pygame.font.SysFont("monospace", 17)
 BLUE = (0,0,255) #Healthy Particle Color
 RED = (255,0,0)  #Infected Particle Color
+#Parameters
 PARTICLECOUNT = 100
 PARTICLERADIUS = 10
+infectionEnabled = True
+colorchaosEnabled = True
 
 class Particle:
-    PARTICLERADIUS = PARTICLERADIUS    
     TIMESTEP = 10
 
-    def __init__(self, x, y, isInfected, x_vel, y_vel):
+    def __init__(self, x, y, isInfected, x_vel, y_vel, color):
         self.x = x
         self.y = y
-        self.isInfected = isInfected
-        if isInfected:
-            self.color = RED
-        else: self.color = BLUE
+        self.isInfected = isInfected    #sets infection status of the particle -> red for infected
         self.x_vel = x_vel
         self.y_vel = y_vel
+        self.PARTICLERADIUS = PARTICLERADIUS
+        self.color = color
         
     def draw(self, window):
-        x = self.x #+ WIDTH / 2       #makes sure, that the coordinate system is shifted from top left of the window to the center
-        y = self.y #+ HEIGHT / 2
+        x = self.x       #makes sure, that the coordinate system is shifted from top left of the window to the center
+        y = self.y
         pygame.draw.circle(window, self.color, (x,y), self.PARTICLERADIUS)  #function creates circle with sepcific parameters
             
-    def update_position(self, particles):
+    def update_position(self):
         self.x += self.x_vel * self.TIMESTEP    #s = v*t
         self.y += self.y_vel * self.TIMESTEP
 
-    def handle_collision(self, particles):  #handles collision with boarder walls
+    def handle_collision(self):  #handles collision with screen walls
         if self.x > WIDTH-self.PARTICLERADIUS:
-            self.x_vel = self.x_vel * -1
-            self.x -= 1
+            self.x_vel = self.x_vel * -1    #changes x direction after hitting wall
+            self.x -= 1                     #prevents gltiching into the wall
         if self.x < 0:
             self.x += 1
             self.x_vel = self.x_vel * -1
@@ -71,16 +72,40 @@ def resolve_collision(p1, p2):
         # We swap the components to make them rebound
         p1.x_vel, p2.X_vel = p2.x_vel, p1.x_vel
         p1.y_vel, p2.y_vel = p2.y_vel, p1.y_vel
+        checkInfection(p1, p2)
+        
+def checkInfection(p1, p2):
+    if infectionEnabled == True: #Checks whether or not the user wants to deal with infections     
+        if p1.isInfected:
+            p2.color = p1.color
+            p1.isInfected= p2.isInfected = True
+        if p2.isInfected:
+            p1.color= p2.color
+            p1.isInfected= p2.isInfected = True
+        
 
 def main():
     particles = []
-    for i in range(PARTICLECOUNT):
-        x = random.randrange(10, 1270, 1)
-        y = random.randrange(10, 710, 1)
-        xdir = random.uniform(-1, 1)
-        ydir = random.uniform(-1, 1)
-        particles.append(Particle(x, y, False, xdir, ydir))
-
+    if colorchaosEnabled == False:
+        for i in range(PARTICLECOUNT):
+            x = random.randrange(10, 1270, 1)
+            y = random.randrange(10, 710, 1)
+            xdir = random.uniform(-1, 1)
+            ydir = random.uniform(-1, 1)
+            particles.append(Particle(x, y, False, xdir, ydir, BLUE))
+        if infectionEnabled == True: #creates red particle if infection is enabled
+            particles.append(Particle(0,0, True, 1, 1, RED))
+    if colorchaosEnabled:
+        for i in range(PARTICLECOUNT):
+            x = random.randrange(10, 1270, 1)   #sets random x and y coordinates
+            y = random.randrange(10, 710, 1)
+            xdir = random.uniform(-1, 1)        #sets starting direction of particles
+            ydir = random.uniform(-1, 1)
+            redColor = random.randrange(0, 255, 1)
+            greenColor = random.randrange(0, 255, 1)
+            blueColor = random.randrange(0, 255, 1)
+            particles.append(Particle(x, y, True, xdir, ydir, (redColor, greenColor, blueColor)))
+        
     run = True
     clock = pygame.time.Clock()     
     while run:
@@ -95,12 +120,10 @@ def main():
                 # Now you compare particle i with particle j
                 p1 = particles[i]
                 p2 = particles[j]
-                
-                # Call the collision function we built earlier
                 resolve_collision(p1, p2)
         for particle in particles:      
-            particle.update_position(particles)
-            particle.handle_collision(particles)
+            particle.update_position()
+            particle.handle_collision()
             particle.draw(screen)
         # Assuming your particles are stored in a list called 'particles'
         pygame.display.update() 
