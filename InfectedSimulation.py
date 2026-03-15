@@ -56,7 +56,6 @@ def resolve_collision(p1, p2):
     dx = p2.x - p1.x
     dy = p2.y - p1.y
     distance = math.sqrt(dx**2 + dy**2)
-    
     # Check if they are actually overlapping
     if distance < (p1.PARTICLERADIUS + p2.PARTICLERADIUS):
         # 2. Calculate the "Normal" vector (direction of the hit)
@@ -70,7 +69,7 @@ def resolve_collision(p1, p2):
         p2.y += ny * (overlap / 2)
         # 4. Dynamic Resolution: Swap velocities (The Bounce)
         # We swap the components to make them rebound
-        p1.x_vel, p2.X_vel = p2.x_vel, p1.x_vel
+        p1.x_vel, p2.x_vel = p2.x_vel, p1.x_vel
         p1.y_vel, p2.y_vel = p2.y_vel, p1.y_vel
         checkInfection(p1, p2)
         
@@ -85,6 +84,7 @@ def checkInfection(p1, p2):
         
 
 def main():
+    #Startup Operations
     particles = []
     if colorchaosEnabled == False:
         for i in range(PARTICLECOUNT):
@@ -107,7 +107,8 @@ def main():
             particles.append(Particle(x, y, True, xdir, ydir, (redColor, greenColor, blueColor)))
         
     run = True
-    clock = pygame.time.Clock()     
+    clock = pygame.time.Clock()    
+    #Gameloop 
     while run:
         clock.tick(30)
         screen.fill((50, 50, 50))
