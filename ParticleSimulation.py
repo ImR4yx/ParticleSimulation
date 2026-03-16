@@ -125,25 +125,20 @@ def main():
     run = True
     clock = pygame.time.Clock()    
     frame_count = 0     
-    # This will look like: {(R, G, B): [count1, count2, ...]}
-    history = {}     #creates the dictionary for the color codes and their value
-    # Initialize the dictionary for each particle's unique color
-    for p in particles:
+    history = {}     #creates the dictionary for the color codes and their value (R,G,B): amount
+    for p in particles:     #creates dictionary entry for each color, -> color code: 0
         if p.color not in history:
             history[p.color] = []
 
     #Gameloop 
     while run:
-        clock.tick(30)
-        frame_count += 1
-        if frame_count % 10 == 0:
-        # 1. Create a temporary counter for THIS frame
-            current_counts = {color: 0 for color in history.keys()}
-        # 2. Count who is still "alive" or present
+        clock.tick(30)      #sets simulation to 30 frames per second
+        frame_count += 1    #+1 for every frame
+        if frame_count % 10 == 0:   #every 10 frames an input is given to the dictionary
+            current_counts = {color: 0 for color in history.keys()} #temporary amounts of particles of a color are stored in here
             for p in particles:
-                current_counts[p.color] += 1
-            # 3. Append these counts to our long-term history
-            for color, count in current_counts.items():
+                current_counts[p.color] += 1    #for every particle of a specfici color 1 is added to the amount
+            for color, count in current_counts.items(): 
                 history[color].append(count)
 
         screen.fill((50, 50, 50))
