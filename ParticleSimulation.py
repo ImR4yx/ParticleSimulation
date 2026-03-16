@@ -3,15 +3,19 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import MainMenu
+
 
 # pygame setup
 pygame.init()
 WIDTH =  1280   #sets screen limits 
 HEIGHT = 720
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Particle Simulation v1.0")
 TEXTFONT = pygame.font.SysFont("monospace", 17)
 BLUE = (0,0,255) #Healthy Particle Color
 RED = (255,0,0)  #Infected Particle Color
+BACKGROUND_COLOR = (50, 50, 50)
 
 #Parameters
 PARTICLECOUNT = 100
@@ -85,7 +89,7 @@ def plot_complex_history(history):                          #function plots the 
     for color, counts in history.items():
         normalized_color = tuple(c / 255 for c in color)    #convert 0-255 to 0-1.0 for matplotlib
         plt.plot(counts, color=normalized_color, linewidth=1, alpha=0.7)
-    plt.title("Population of 200 Unique Particle Colors")   #plot title
+    plt.title(f"Population of {PARTICLECOUNT} Unique Particle Colors")   #plot title
     plt.xlabel("Time (Snapshots)")                          #x-axis label
     plt.ylabel("Count")                                     #y-axis label
     plt.show()                                              #shows plot
@@ -95,7 +99,6 @@ def main():
     #Startup Operations
     particles = []
     colors = np.zeros((1000, 3))                    #creates an array with 1000 rows and 3 cols with 0 as input
-    color_count = np.zeros(PARTICLECOUNT)
     if colorchaosEnabled == False:                  
         for i in range(PARTICLECOUNT-1):
             x = random.randrange(10, WIDTH-10, 1)       
@@ -135,21 +138,27 @@ def main():
                 current_counts[p.color] += 1    #for every particle of a specfici color 1 is added to the amount
             for color, count in current_counts.items(): 
                 history[color].append(count)
-        screen.fill((50, 50, 50))
+        screen.fill(BACKGROUND_COLOR)
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:   #checks for quitting condition
                 run = False
-        num_particles = len(particles)
-        for i in range(num_particles):  #loop for detecting collisions between the particles
-            for j in range(i + 1, num_particles):
-                p1 = particles[i]
-                p2 = particles[j]
-                resolve_collision(p1, p2)
-        for particle in particles:       
-            particle.update_position()  #updates position of the particles
-            particle.handle_collision() #handles collision with screen borders
-            particle.draw(screen)       #draws the particle on the canvas again each frame with updated position 
-        pygame.display.update() 
+            if MainMenu.current_state == MainMenu.MENU:  #conditions for starting the simulation
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:     #waits for press of space key in order to start the simulation
+                        MainMenu.current_state = MainMenu.SIMULATION
+        if MainMenu.current_state == MainMenu.MENU:
+            MainMenu.draw_start_menu(screen, WIDTH, BACKGROUND_COLOR)
+        elif MainMenu.current_state == MainMenu.SIMULATION:
+            for i in range(len(particles)):  #loop for detecting collisions between the particles
+                for j in range(i + 1, len(particles)):
+                    p1 = particles[i]
+                    p2 = particles[j]
+                    resolve_collision(p1, p2)
+            for particle in particles:       
+                particle.update_position()  #updates position of the particles
+                particle.handle_collision() #handles collision with screen borders
+                particle.draw(screen)       #draws the particle on the canvas again each frame with updated position 
+            pygame.display.update() 
     plot_complex_history(history)       #calls the plot function to plot the amount of particles of different colors
     pygame.quit()                       #ends the simulation
 main()
