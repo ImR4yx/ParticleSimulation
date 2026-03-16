@@ -1,6 +1,8 @@
 import pygame
 import math
 import random
+import numpy as np
+import matplotlib.pyplot as plt
 
 # pygame setup
 pygame.init()
@@ -81,13 +83,26 @@ def checkInfection(p1, p2):
         if p2.isInfected:
             p1.color= p2.color
             p1.isInfected= p2.isInfected = True
+
+def plot_complex_history(history):  #function plots the number of particles in a diagramm with matching color codes
+    plt.figure(figsize=(12, 8))
+    for color, counts in history.items():
+        # Convert (255, 255, 255) to (1.0, 1.0, 1.0) for Matplotlib
+        normalized_color = tuple(c / 255 for c in color)
+        plt.plot(counts, color=normalized_color, linewidth=1, alpha=0.7)
+    plt.title("Population of 200 Unique Particle Colors")
+    plt.xlabel("Time (Snapshots)")
+    plt.ylabel("Count")
+    plt.show()
         
 
 def main():
     #Startup Operations
     particles = []
+    colors = np.zeros((1000, 3))    #creates an array with 1000 rows and 3 cols with 0 as input
+    color_count = np.zeros(PARTICLECOUNT)
     if colorchaosEnabled == False:
-        for i in range(PARTICLECOUNT):
+        for i in range(PARTICLECOUNT-1):
             x = random.randrange(10, 1270, 1)
             y = random.randrange(10, 710, 1)
             xdir = random.uniform(-1, 1)
@@ -101,16 +116,36 @@ def main():
             y = random.randrange(10, 710, 1)
             xdir = random.uniform(-1, 1)        #sets starting direction of particles
             ydir = random.uniform(-1, 1)
-            redColor = random.randrange(0, 255, 1)
+            redColor = random.randrange(0, 255, 1)  #randomly generates color codes for the particles
             greenColor = random.randrange(0, 255, 1)
             blueColor = random.randrange(0, 255, 1)
+            colors[i] = [redColor, greenColor, blueColor]   #saves the different color codes in colors array
             particles.append(Particle(x, y, True, xdir, ydir, (redColor, greenColor, blueColor)))
         
     run = True
     clock = pygame.time.Clock()    
+    frame_count = 0     
+    # This will look like: {(R, G, B): [count1, count2, ...]}
+    history = {}     #creates the dictionary for the color codes and their value
+    # Initialize the dictionary for each particle's unique color
+    for p in particles:
+        if p.color not in history:
+            history[p.color] = []
+
     #Gameloop 
     while run:
         clock.tick(30)
+        frame_count += 1
+        if frame_count % 10 == 0:
+        # 1. Create a temporary counter for THIS frame
+            current_counts = {color: 0 for color in history.keys()}
+        # 2. Count who is still "alive" or present
+            for p in particles:
+                current_counts[p.color] += 1
+            # 3. Append these counts to our long-term history
+            for color, count in current_counts.items():
+                history[color].append(count)
+
         screen.fill((50, 50, 50))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -128,8 +163,10 @@ def main():
             particle.draw(screen)
         # Assuming your particles are stored in a list called 'particles'
         pygame.display.update() 
+    plot_complex_history(history)
     pygame.quit()
 main()
+
 
 
 
