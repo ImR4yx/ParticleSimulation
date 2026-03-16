@@ -17,8 +17,8 @@ RED = (255,0,0)  #Infected Particle Color
 BACKGROUND_COLOR = (50, 50, 50)
 
 #Parameters
-PARTICLECOUNT = 1000
-PARTICLERADIUS = 5
+PARTICLECOUNT = 5000
+PARTICLERADIUS = 3
 CELL_SIZE = PARTICLERADIUS*4    #Cell size for collision detection
 infectionEnabled = True
 colorchaosEnabled = True
@@ -63,6 +63,11 @@ def resolve_collision(p1, p2):
     dx = p2.x - p1.x
     dy = p2.y - p1.y
     distance = math.sqrt(dx**2 + dy**2)
+    if distance == 0:
+        p1.x += 0.1
+        p1.y += 0.1
+        dx, dy = 0.1, 0.1
+        distance = math.sqrt(dx**2 + dy**2)
     if distance < (p1.PARTICLERADIUS + p2.PARTICLERADIUS):  #checks for overlap of two particles
         nx = dx / distance  #calculates normal vectors of hit direction
         ny = dy / distance
