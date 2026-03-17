@@ -7,8 +7,8 @@ import MainMenu
 
 # pygame setup
 pygame.init()
-WIDTH =  1920   #sets screen limits 
-HEIGHT = 1080
+WIDTH =  1600   #sets screen limits 
+HEIGHT = 900
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Particle Simulation v1.0")
 TEXTFONT = pygame.font.SysFont("monospace", 17)
@@ -17,7 +17,7 @@ RED = (255,0,0)  #Infected Particle Color
 BACKGROUND_COLOR = (50, 50, 50)
 
 #Parameters
-PARTICLECOUNT = 5000
+PARTICLECOUNT = 1000
 PARTICLERADIUS = 3
 CELL_SIZE = PARTICLERADIUS*4    #Cell size for collision detection
 infectionEnabled = True
@@ -191,8 +191,3 @@ def main():
     plot_complex_history(history)       #calls the plot function to plot the amount of particles of different colors
     pygame.quit()                       #ends the simulation
 main()
-
-
-
-
-        
