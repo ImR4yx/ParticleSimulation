@@ -3,7 +3,7 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-import MainMenu
+import main_menu
 
 
 # pygame setup
@@ -142,13 +142,13 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:   #checks for quitting condition
                 run = False
-            if MainMenu.current_state == MainMenu.MENU:  #conditions for starting the simulation
+            if main_menu.current_state == main_menu.MENU:  #conditions for starting the simulation
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:     #waits for press of space key in order to start the simulation
-                        MainMenu.current_state = MainMenu.SIMULATION
-        if MainMenu.current_state == MainMenu.MENU:
-            MainMenu.draw_start_menu(screen, WIDTH, BACKGROUND_COLOR)
-        elif MainMenu.current_state == MainMenu.SIMULATION:
+                        main_menu.current_state = main_menu.SIMULATION
+        if main_menu.current_state == main_menu.MENU:
+            main_menu.draw_start_menu(screen, WIDTH, BACKGROUND_COLOR)
+        elif main_menu.current_state == main_menu.SIMULATION:
             for i in range(len(particles)):  #loop for detecting collisions between the particles
                 for j in range(i + 1, len(particles)):
                     p1 = particles[i]

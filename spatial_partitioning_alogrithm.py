@@ -3,7 +3,7 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-import MainMenu
+import main_menu
 
 # pygame setup
 pygame.init()
@@ -105,8 +105,6 @@ def get_grid_coords(p, cell_size):
 def main():
     #Startup Operations
     particles = []
-    
-    colors = np.zeros((PARTICLECOUNT, 3))                    #creates an array with 1000 rows and 3 cols with 0 as input
     if colorchaosEnabled == False:                  
         for i in range(PARTICLECOUNT-1):
             x = random.randrange(10, WIDTH-10, 1)       
@@ -125,7 +123,6 @@ def main():
             redColor = random.randrange(0, 255, 1)  #randomly generates color codes for the particles
             greenColor = random.randrange(0, 255, 1)
             blueColor = random.randrange(0, 255, 1)
-            colors[i] = [redColor, greenColor, blueColor]   #saves the different color codes in colors array
             particles.append(Particle(x, y, True, xdir, ydir, (redColor, greenColor, blueColor)))
         
     run = True
@@ -150,13 +147,13 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:   #checks for quitting condition
                 run = False
-            if MainMenu.current_state == MainMenu.MENU:  #conditions for starting the simulation
+            if main_menu.current_state == main_menu.MENU:  #conditions for starting the simulation
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:     #waits for press of space key in order to start the simulation
-                        MainMenu.current_state = MainMenu.SIMULATION
-        if MainMenu.current_state == MainMenu.MENU:
-            MainMenu.draw_start_menu(screen, WIDTH, BACKGROUND_COLOR)
-        elif MainMenu.current_state == MainMenu.SIMULATION:
+                        main_menu.current_state = main_menu.SIMULATION
+        if main_menu.current_state == main_menu.MENU:
+            main_menu.draw_start_menu(screen, WIDTH, BACKGROUND_COLOR)
+        elif main_menu.current_state == main_menu.SIMULATION:
             # 1. Clear the grid at the start of every frame!
             grid = {} 
             # 2. Populate the grid
