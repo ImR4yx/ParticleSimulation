@@ -19,12 +19,12 @@ BACKGROUND_COLOR = (10, 10, 10)
 #Parameters
 PARTICLECOUNT = 1000
 PARTICLERADIUS = 0.1
-CELL_SIZE = PARTICLERADIUS*4    #Cell size for collision detection
 infectionEnabled = True
 colorchaosEnabled = True
+TIMESTEP = 3600
 
 class Particle:
-    TIMESTEP = 3600
+    TIMESTEP = TIMESTEP
     G = 6.67428e-11 #gravitational constant
 
     def __init__(self, x, y, isInfected, x_vel, y_vel, color, mass, radius, isSun):
@@ -80,13 +80,25 @@ class Particle:
         force_x = math.cos(theta) * force
         force_y = math.sin(theta) * force
         return force_x, force_y
-        
+    
+def calculate_start_velocity(dx, dy):
+    distance = math.sqrt(dx**2 + dy**2) #distance between the particles
+    if distance == 0:   #prevents dividing by zero
+        return 0, 0
+    nx = dx/distance    #normal vectors
+    ny = dy/distance
+    return nx/TIMESTEP, ny/TIMESTEP #returns the normal vektors divided by the time step, in order to adjust the velocity to the time speed
+                                    #otherwise the particles would instantly fly off the screen
+    
+
 def main():
     #Startup Operations
     particles = []
+    particle_spawn_coordinates = []
+    last_particle_index = 0 #stores the index of the last particle
     run = True
     clock = pygame.time.Clock()
-    sun = Particle(WIDTH/2, HEIGHT/2, False, 0, 0, "yellow", 1000000, 20, True)
+    sun = Particle(WIDTH/2, HEIGHT/2, False, 0, 0, "blue", 1000000, 20, True)
     particles.append(sun)
     #Gameloop 
     while run:
@@ -101,18 +113,30 @@ def main():
                         main_menu.current_state = main_menu.SIMULATION
         if main_menu.current_state == main_menu.MENU:
             main_menu.draw_start_menu(screen, WIDTH, BACKGROUND_COLOR)
-        elif main_menu.current_state == main_menu.SIMULATION:
-            mouse_buttons = pygame.mouse.get_pressed()
+        elif main_menu.current_state == main_menu.SIMULATION:   #starts if simulation is being started
+            mouse_buttons = pygame.mouse.get_pressed()  #checks if any of the three mouse buttons was pressed -> bool touple
             if mouse_buttons[0]:
                 # This code runs EVERY frame the button is held
-                x, y = pygame.mouse.get_pos()
-                print(f"Mouse is at: {x}, {y}")
-                particles.append(Particle(x, y, False, 0, 0, "white", 100000000, 3, False))
+                x, y = pygame.mouse.get_pos()   #gets cursor position
+                particle_spawn_coordinates.append([x, y])   #appends the spawn coordinates of the last particle to the array
+                dx, dy = 0, 0   #differences in x and y coordinates of 2 particles
+                xvel, yvel = 0, 0   #starting velocities
+                if last_particle_index != 0:    #prevents index failure
+                    dx = particle_spawn_coordinates[last_particle_index][0] - particle_spawn_coordinates[last_particle_index-1][0]
+                    dy = particle_spawn_coordinates[last_particle_index][1] - particle_spawn_coordinates[last_particle_index-1][1]
+                    xvel, yvel = calculate_start_velocity(dx, dy)
+                particles.append(Particle(x, y, False, xvel, yvel, "white", 100000000, 3, False))
+                last_particle_index += 1
+            current_particles = -1  #saves the amount of particles, -1 because the sun is also technically a particle
             for particle in particles:     
                 #print(f"x: {particle.x}, y: {particle.y}")  
                 if particle.isSun == False:
                     particle.update_position(sun)  #updates position of the particles
                 particle.draw(screen)       #draws the particle on the canvas again each frame with updated position 
+                current_particles += 1
+            particles_text = f"Particles: {current_particles}"
+            particle_text_surface = TEXTFONT.render(particles_text, True, (0, 0, 200))
+            screen.blit(particle_text_surface, (20, 20))
             pygame.display.update() 
     pygame.quit()                       #ends the simulation
 main()
